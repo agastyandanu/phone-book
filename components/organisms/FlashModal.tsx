@@ -8,13 +8,16 @@ interface FlashModalProps {
 }
 
 const FlashModal: React.FC<FlashModalProps> = ({ isOpen, onClose, title }) => {
-  if (!isOpen) return null;
 
   useEffect(() => {
     setTimeout(function() {
       onClose()
     }, 700);
   })
+
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div className={modalStyles}>
