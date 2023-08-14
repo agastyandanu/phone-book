@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 import { ContactListStyles, TableStyles, ActionButtonStyles } from './ContactList.style';
 
 import ModalAddEdit from './ModalAddEdit';
@@ -82,7 +83,7 @@ const ContactList: React.FC<ContactListProps> = ({ contacts }) => {
             {contacts.filter(contact => contact.isFavourite === true).map((val, key) => (
               <tr key={key}>
                 <td className='profilePhoto' onClick={() => detailAction(val)}>
-                  <img src={val.profilePhoto} alt='profile-photo' />
+                  <Image src={val.profilePhoto} alt='profile-photo' width={100} height={100} unoptimized />
                 </td>
                 <td onClick={() => detailAction(val)}>{val.name}</td>
                 <td onClick={() => detailAction(val)}>{val.phone}</td>
@@ -131,7 +132,7 @@ const ContactList: React.FC<ContactListProps> = ({ contacts }) => {
             {contacts.filter(contact => contact.isFavourite === false).map((val, key) => (
               <tr key={key}>
                 <td className='profilePhoto' onClick={() => detailAction(val)}>
-                  <img src={val.profilePhoto} alt='profile-photo' />
+                  <Image src={val.profilePhoto} alt='profile-photo' width={100} height={100} unoptimized />
                 </td>
                 <td onClick={() => detailAction(val)}>{val.name}</td>
                 <td onClick={() => detailAction(val)}>{val.phone}</td>

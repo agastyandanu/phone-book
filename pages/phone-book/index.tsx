@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { css } from '@emotion/css'
+import Image from 'next/image'
 
 import Layout from '@/templates/Layout'
 import ContactList from '@/components/organisms/ContactList'
@@ -106,7 +107,7 @@ export default function PhoneBook() {
       <Loading isOpen={isLoading} />
       <Layout>
 
-        <img className={mainIconSyle} src={contIllust.src} alt='contact-illustration' />
+        <Image className={mainIconSyle} src={contIllust.src} alt='contact-illustration' width={100} height={100} unoptimized />
         <div className={ContainerStyle}>
           <h2>Your Contact List</h2>
           <div className={TitleStyle}>

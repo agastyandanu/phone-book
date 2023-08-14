@@ -1,4 +1,5 @@
 import { css } from '@emotion/css'
+import Image from 'next/image'
 
 import Layout from '@/templates/Layout'
 import FlashModal from '@/components/organisms/FlashModal'
@@ -144,7 +145,7 @@ export default function DetailContact() {
       <Layout>
         <div className={ContainerStyle}>
 
-          <img className={ProfilePhoto} src={userData?.profilePhoto} alt='contact-illustration' />
+          <Image className={ProfilePhoto} src={userData?.profilePhoto} alt='contact-illustration' width={100} height={100} unoptimized />
 
           <div className={ContentStyle}>
             <h2>{userData?.name || '-'}</h2>

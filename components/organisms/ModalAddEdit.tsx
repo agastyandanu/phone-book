@@ -25,7 +25,6 @@ interface ModalAddEditProps {
 }
 
 const ModalAddEdit: React.FC<ModalAddEditProps> = ({ isOpen, onClose, initialContact }) => {
-  if (!isOpen) return null;
 
   const [isMissingForm, setIsMissingForm] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -68,6 +67,10 @@ const ModalAddEdit: React.FC<ModalAddEditProps> = ({ isOpen, onClose, initialCon
       onClose();      
     }, 500);
   };
+
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div className={modalAddStyles}>
