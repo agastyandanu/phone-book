@@ -44,7 +44,7 @@ const ContactList: React.FC<ContactListProps> = ({ contacts }) => {
   }, [])
 
   const detailAction = (data: any) => {
-    router.push(`/phone-book/${data.id}`);
+    router.push(`/${data.id}`);
   }
 
   const favouriteAction = (data: any) => {
