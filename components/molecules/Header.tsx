@@ -15,6 +15,7 @@ const Header: React.FC<HeaderProps> = ({ title, description }) => {
       <meta name="description" content={description} />
       <meta http-equiv="X-UA-Compatible" content="IE=edge" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="icon" href="https://illustoon.com/photo/7817.png" />
     </Head>
   );
 };
