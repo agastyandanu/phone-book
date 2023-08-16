@@ -44,19 +44,19 @@ export const TableStyles = css`
   }
 
   @media (max-width: 576px) {
-    td:nth-last-child(3) {
+    td:nth-last-child(2) {
       display: none;
     }
   }
 
   @media (max-width: 768px) {
-    td:nth-last-child(1) {
+    td:nth-last-child(0) {
       display: none;
     }
   }
 
   @media (max-width: 992px) {
-    td:nth-last-child(2) {
+    td:nth-last-child(1) {
       display: none;
     }
   }

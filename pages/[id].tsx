@@ -1,20 +1,25 @@
+import { useEffect, useState } from 'react'
+import { useQuery, useMutation } from '@apollo/client'
+import { useRouter } from 'next/router'
 import { css } from '@emotion/css'
 import Image from 'next/image'
 
 import Layout from '@/templates/Layout'
 import FlashModal from '@/components/organisms/FlashModal'
-import ModalAddEdit from '@/components/organisms/ModalAddEdit'
 import ModalDelete from '@/components/organisms/ModalDelete'
+import ModalEdit from '@/components/organisms/ModalEdit'
 import Header from '@/components/molecules/Header'
-import Loading from '@/components/molecules/Loading'
 import Button from '@/components/atoms/Button'
 
+import profileImage from '@/public/images/profile-image.png'
 import { HiPhone } from 'react-icons/hi'
 import { MdEmail, MdLocationOn } from 'react-icons/md'
-import { useEffect, useState } from 'react'
+import { FaRegStar, FaStar, FaCalendarWeek } from 'react-icons/fa'
+import { MdModeEdit, MdDelete } from 'react-icons/md'
 
-import { FaRegStar, FaStar } from 'react-icons/fa';
-import { MdModeEdit, MdDelete } from 'react-icons/md';
+import { GET_CONTACT_DETAIL } from '@/graphql/queries'
+import { DELETE_CONTACT } from '@/graphql/mutations';
+import { convertDateTime } from '@/utils/helpers'
 
 const ProfilePhoto = css`
   max-width: 280px;
@@ -80,39 +85,48 @@ const ActionBtnStyle = css`
   align-items: center;
 `;
 
-export default function DetailContact() {
-  const [isLoading, setIsLoading] = useState(true);
+interface ContactEdit {
+  id: number;
+  created_at: string;
+  first_name: string;
+  last_name: string;
+  phones: Array<{
+    __typename: string;
+    number: string;
+  }>;
+}
+interface UserDetail {
+  id: number;
+  created_at: string;
+  first_name: string;
+  last_name: string;
+  phones: Array<{
+    phone: string;
+  }>;
+}
+  
+const DetailContact: React.FC<UserDetail> = () => {
+  const router = useRouter();
+  const [deleteContact] = useMutation(DELETE_CONTACT);
+
   const [isAddFav, setIsAddFav] = useState(false);
   const [isRemoveFav, setIsRemoveFav] = useState(false);
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
   const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState('');
-  const [selectedData, setSelectedData] = useState({
-    id: '',
-    name: '',
-    phone: '',
-    email: '',
-    profilePhoto: '',
-  })
+  const [selectedId, setSelectedId] = useState(0);
 
-  const userData = {
-    id: 2,
-    name: 'Danu Agastyan',
-    phone: '081234567890',
-    email: 'agastyandanu@gmail.com',
-    profilePhoto: 'https://media.licdn.com/dms/image/C5603AQF6UWDJeQqRmA/profile-displayphoto-shrink_800_800/0/1643895737758?e=2147483647&v=beta&t=fbQhxo0Qlmm0_Au5CpFo5KLuU5Oxpfgt5iUBaBuUxjw',
-    address: '421 Cindy Plains, Henriettehaven, North Carolina, 38957, 1-374-238-5482 x65968, 1-654-944-3614',
-    isFavourite: false
-  }
+  const [selectedEditContact, setSelectedEditContact] = useState<ContactEdit | null>(null);
 
-  useEffect(() => {
-    setTimeout(function() {
-      setIsLoading(false)
-    }, 1000);
-  })
+  const { loading, error, data } = useQuery(GET_CONTACT_DETAIL, {
+    variables: {
+      id: router.query.id
+    },
+    skip: !router.query.id,
+  });
+  
+  const userDetail = data?.contact_by_pk;
 
   const favouriteAction = (data: any) => {
-    console.log('status fav', data.id, data.isFavourite)
     const isFav = data.isFavourite;
     if (isFav) {
       setIsRemoveFav(true)
@@ -121,15 +135,8 @@ export default function DetailContact() {
     }
   }
 
-  const editAction = (data: any) => {
-    setSelectedData((prevData) => ({
-      ...prevData,
-      id: data.id,
-      name: data.name,
-      phone: data.phone,
-      email: data.email,
-      profilePhoto: data.profilePhoto
-    }));
+  const editAction = (contact: ContactEdit) => {
+    setSelectedEditContact(contact)
     setIsModalEditOpen(true)
   };
 
@@ -138,17 +145,28 @@ export default function DetailContact() {
     setIsModalDeleteOpen(true);
   };
 
+  const confirmDelete = async () => {
+    try {
+      const { data } = await deleteContact({
+        variables: { id: selectedId }
+      });
+      if (data && data.delete_contact_by_pk) {
+        window.location.href = ('/');
+      }
+      setIsModalDeleteOpen(false);
+    } catch (error) {
+      console.error('Error deleting contact:', error);
+    }
+  };
+
   return (
     <>
       <Header title="Detail Contact | Phone Book App" description="Explore our comprehensive Phone Book List, featuring a curated collection of contact information. Easily find and access phone numbers, addresses, and more. Streamline your communication with our user-friendly Phone Book List." />
-      <Loading isOpen={isLoading} />
       <Layout>
         <div className={ContainerStyle}>
-
-          <Image className={ProfilePhoto} src={userData?.profilePhoto} alt='contact-illustration' width={100} height={100} unoptimized />
-
+          <Image className={ProfilePhoto} src={profileImage} alt='contact-illustration' width={100} height={100} unoptimized />
           <div className={ContentStyle}>
-            <h2>{userData?.name || '-'}</h2>
+            <h2>{userDetail?.first_name} {userDetail?.last_name}</h2>
             <div className={ActionBtnStyle} style={{display: 'flex'}}>
               <Button
                 size='sm'
@@ -156,14 +174,14 @@ export default function DetailContact() {
                 backgroundColorHover='none'
                 color='#fe5c89'
               >
-                {userData.isFavourite ?
+                {userDetail?.isFavourite ?
                   <FaStar
-                    onClick={() => favouriteAction(userData)}
+                    onClick={() => favouriteAction(userDetail)}
                     size={23}
                   />
                   :
                   <FaRegStar
-                    onClick={() => favouriteAction(userData)}
+                    onClick={() => favouriteAction(userDetail)}
                     size={23}
                   />
                 }
@@ -173,7 +191,7 @@ export default function DetailContact() {
                 backgroundColor='#none'
                 backgroundColorHover='none'
                 color='#fe5c89'
-                onClick={() => editAction(userData)}
+                onClick={() => editAction(userDetail)}
               >
                 <MdModeEdit size={25}/>
               </Button>
@@ -182,31 +200,39 @@ export default function DetailContact() {
                 backgroundColor='#none'
                 backgroundColorHover='none'
                 color='#fe5c89'
-                onClick={() => deleteAction(userData)}
+                onClick={() => deleteAction(userDetail)}
               >
                 <MdDelete size={25}/>
               </Button>
             </div>
             <div className='detail'>
               <div className='dt'>
+                <span><FaCalendarWeek className='icon' /></span>
+                <span>{userDetail?.created_at && convertDateTime(userDetail.created_at)}</span>
+              </div>
+              <div className='dt'>
                 <span><HiPhone className='icon' /></span>
-                <span>{userData.phone || '-'}</span>
-              </div>
-              <div className='dt'>
-                <span><MdEmail className='icon' /></span>
-                <span>{userData?.email || '-'}</span>
-              </div>
-              <div className='dt'>
-                <span><MdLocationOn className='icon' /></span>
-                <span>{userData.address || '-'}</span>
+                {userDetail?.phones?.map((val, key) => (
+                  <span key={key}>{val.number}</span>
+                ))}
               </div>
             </div>
           </div>
-
         </div>
 
-        <ModalAddEdit isOpen={isModalEditOpen} onClose={() => setIsModalEditOpen(false)} initialContact={selectedData} />
-        <ModalDelete isOpen={isModalDeleteOpen} onClose={() => setIsModalDeleteOpen(false)} id={selectedId} />
+        {isModalEditOpen && selectedEditContact && (
+        <ModalEdit
+          isOpen={isModalEditOpen}
+          onClose={() => setIsModalEditOpen(false)}
+          onSuccess={() => {
+            console.log("UDAH SUKSES AJA")
+            // setIsModalEditOpen(false);
+          }}
+          initialContact={selectedEditContact}
+        />
+      )}
+
+        <ModalDelete isOpen={isModalDeleteOpen} onDelete={confirmDelete} onClose={() => setIsModalDeleteOpen(false)} id={selectedId} />
         <FlashModal isOpen={isAddFav} onClose={() => setIsAddFav(false)} title='Added to favourite!' />
         <FlashModal isOpen={isRemoveFav} onClose={() => setIsRemoveFav(false)} title='Removed from favourite!' />
 
@@ -214,3 +240,5 @@ export default function DetailContact() {
     </>
   )
 }
+
+export default DetailContact;

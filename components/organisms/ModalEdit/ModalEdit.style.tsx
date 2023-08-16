@@ -1,6 +1,6 @@
 import { css } from '@emotion/css';
 
-export const modalAddStyles = css`
+export const modalEditStyles = css`
   position: fixed;
   top: 0;
   left: 0;
@@ -12,7 +12,7 @@ export const modalAddStyles = css`
   align-items: center;
 `;
 
-export const modalAddHeader = css`
+export const modalEditHeader = css`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -23,12 +23,12 @@ export const modalAddHeader = css`
   }
 `;
 
-export const modalAddBody = css`
+export const modalEditBody = css`
   width: 100%;
   padding: 10px 0 10px 0;
 `;
 
-export const contentAddStyles = css`
+export const contentEditStyles = css`
   background-color: white;
   padding: 20px;
   border-radius: 8px;
@@ -55,4 +55,9 @@ export const formGroup = css`
   input {
     margin-top: 5px;
   }
+`;
+
+export const submitButton = css`
+  display: flex;
+  justify-content: space-between;
 `;

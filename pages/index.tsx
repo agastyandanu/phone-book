@@ -1,16 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useQuery, useApolloClient, useMutation } from '@apollo/client'
 import { css } from '@emotion/css'
 import Image from 'next/image'
 
 import Layout from '@/templates/Layout'
 import ContactList from '@/components/organisms/ContactList'
-import ModalAdd from '@/components/organisms/ModalAddEdit'
+import ModalAdd from '@/components/organisms/ModalAdd'
 import Header from '@/components/molecules/Header'
 import Loading from '@/components/molecules/Loading'
 import Button from '@/components/atoms/Button'
 
-import contIllust from '@/public/illustration/contact-illust.svg'
+import contIllust from '@/public/images/contact-illust.svg'
 import { IoMdAddCircle } from 'react-icons/io'
+
+import { GET_CONTACT_LIST } from '@/graphql/queries'
+import { ADD_CONTACT_WITH_PHONES } from '@/graphql/mutations'
 
 const mainIconSyle = css`
   display: none;
@@ -75,36 +79,74 @@ const FilterStyle = css`
   font-size: 18px;
 `;
 
+const paginationButton = css`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+`;
+
 export default function PhoneBook() {
-  const [isLoading, setIsLoading] = useState(true);
+  const client = useApolloClient();
+  const [addContact] = useMutation(ADD_CONTACT_WITH_PHONES);
   const [isModalAddOpen, setIsModalAddOpen] = useState(false);
+
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
+  const { loading, error, data, refetch } = useQuery(GET_CONTACT_LIST, {
+    variables: {
+      limit: pageSize,
+      offset: (page - 1) * pageSize,
+      order_by: { created_at: 'desc' },
+      where: {
+        // filter
+      },
+    },
+  });
+
+  if (loading) {
+    return <Loading isOpen={loading} />;
+  }
+
+  if (error) {
+    return <p>Error: {error.message}</p>;
+  }
+
+  const contacts = data?.contact || [];
+
+  const handleModalClose = () => {
+    console.log("MODAL CLOSED")
+    setIsModalAddOpen(false);
+    // await addContact({
+    //   variables: contactData,
+    // });
+
+    refetch();
+
+    // useQuery(GET_CONTACT_LIST, {
+    //   variables: {
+    //     firstName: '',
+    //   },
+    // })
   
-  const contacts = [
-    { id: 1, name: 'Ladys Maopatni Sinaga', phone: '081234567890', email: 'ladys@gmail.com', profilePhoto: 'https://media.licdn.com/dms/image/C5603AQF6UWDJeQqRmA/profile-displayphoto-shrink_800_800/0/1643895737758?e=2147483647&v=beta&t=fbQhxo0Qlmm0_Au5CpFo5KLuU5Oxpfgt5iUBaBuUxjw', address: '421 Cindy Plains, Henriettehaven, North Carolina, 38957, 1-374-238-5482 x65968, 1-654-944-3614', isFavourite: true },
-    { id: 2, name: 'Danu Agastyan', phone: '081234567890', email: 'agastyandanu@gmail.com', profilePhoto: 'https://media.licdn.com/dms/image/C5603AQF6UWDJeQqRmA/profile-displayphoto-shrink_800_800/0/1643895737758?e=2147483647&v=beta&t=fbQhxo0Qlmm0_Au5CpFo5KLuU5Oxpfgt5iUBaBuUxjw', address: '421 Cindy Plains, Henriettehaven, North Carolina, 38957, 1-374-238-5482 x65968, 1-654-944-3614', isFavourite: false },
-    { id: 3, name: 'Jane Smith', phone: '081234567890', email: 'jane@example.com', profilePhoto: 'https://mir-s3-cdn-cf.behance.net/project_modules/hd/285ce8115100471.6047eaa30896a.jpg', address: '421 Cindy Plains, Henriettehaven, North Carolina, 38957, 1-374-238-5482 x65968, 1-654-944-3614', isFavourite: true },
-    { id: 4, name: 'Jane Smith', phone: '081234567890', email: 'janesample@example.com', profilePhoto: 'https://media.licdn.com/dms/image/C5603AQF6UWDJeQqRmA/profile-displayphoto-shrink_800_800/0/1643895737758?e=2147483647&v=beta&t=fbQhxo0Qlmm0_Au5CpFo5KLuU5Oxpfgt5iUBaBuUxjw', address: '421 Cindy Plains, Henriettehaven, North Carolina, 38957, 1-374-238-5482 x65968, 1-654-944-3614', isFavourite: false },
-    { id: 5, name: 'Jane Smith', phone: '081234567890', email: 'jane@example.com', profilePhoto: 'https://media.licdn.com/dms/image/C5603AQF6UWDJeQqRmA/profile-displayphoto-shrink_800_800/0/1643895737758?e=2147483647&v=beta&t=fbQhxo0Qlmm0_Au5CpFo5KLuU5Oxpfgt5iUBaBuUxjw', address: '421 Cindy Plains, Henriettehaven, North Carolina, 38957, 1-374-238-5482 x65968, 1-654-944-3614', isFavourite: true },
-    { id: 6, name: 'Jane Smith', phone: '081234567890', email: 'jane@example.com', profilePhoto: 'https://mir-s3-cdn-cf.behance.net/project_modules/hd/285ce8115100471.6047eaa30896a.jpg', address: '421 Cindy Plains, Henriettehaven, North Carolina, 38957, 1-374-238-5482 x65968, 1-654-944-3614', isFavourite: false },
-    { id: 7, name: 'Jane Smith Danu', phone: '081234567890', email: 'jane@example.com', profilePhoto: 'https://media.licdn.com/dms/image/C5603AQF6UWDJeQqRmA/profile-displayphoto-shrink_800_800/0/1643895737758?e=2147483647&v=beta&t=fbQhxo0Qlmm0_Au5CpFo5KLuU5Oxpfgt5iUBaBuUxjw', address: '421 Cindy Plains, Henriettehaven, North Carolina, 38957, 1-374-238-5482 x65968, 1-654-944-3614', isFavourite: false },
-    { id: 8, name: 'Jane Smith', phone: '081234567890', email: 'jane@example.com', profilePhoto: 'https://mir-s3-cdn-cf.behance.net/project_modules/hd/285ce8115100471.6047eaa30896a.jpg', address: '421 Cindy Plains, Henriettehaven, North Carolina, 38957, 1-374-238-5482 x65968, 1-654-944-3614', isFavourite: false },
-    { id: 9, name: 'Jane Smith', phone: '081234567890', email: 'jane@example.com', profilePhoto: 'https://media.licdn.com/dms/image/C5603AQF6UWDJeQqRmA/profile-displayphoto-shrink_800_800/0/1643895737758?e=2147483647&v=beta&t=fbQhxo0Qlmm0_Au5CpFo5KLuU5Oxpfgt5iUBaBuUxjw', address: '421 Cindy Plains, Henriettehaven, North Carolina, 38957, 1-374-238-5482 x65968, 1-654-944-3614', isFavourite: false },
-    { id: 10, name: 'Jane Smith', phone: '081234567890', email: 'jane@example.com', profilePhoto: 'https://mir-s3-cdn-cf.behance.net/project_modules/hd/285ce8115100471.6047eaa30896a.jpg', address: '421 Cindy Plains, Henriettehaven, North Carolina, 38957, 1-374-238-5482 x65968, 1-654-944-3614', isFavourite: false },
-    { id: 11, name: 'Jane Smith', phone: '081234567890', email: 'jane@example.com', profilePhoto: 'https://media.licdn.com/dms/image/C5603AQF6UWDJeQqRmA/profile-displayphoto-shrink_800_800/0/1643895737758?e=2147483647&v=beta&t=fbQhxo0Qlmm0_Au5CpFo5KLuU5Oxpfgt5iUBaBuUxjw', address: '421 Cindy Plains, Henriettehaven, North Carolina, 38957, 1-374-238-5482 x65968, 1-654-944-3614', isFavourite: false },
-    { id: 12, name: 'Jane Smith Danu', phone: '081234567890', email: 'jane@example.com', profilePhoto: 'https://mir-s3-cdn-cf.behance.net/project_modules/hd/285ce8115100471.6047eaa30896a.jpg', address: '421 Cindy Plains, Henriettehaven, North Carolina, 38957, 1-374-238-5482 x65968, 1-654-944-3614', isFavourite: false },
-    { id: 13, name: 'Jane Smith', phone: '081234567890', email: 'jane@example.com', profilePhoto: 'https://media.licdn.com/dms/image/C5603AQF6UWDJeQqRmA/profile-displayphoto-shrink_800_800/0/1643895737758?e=2147483647&v=beta&t=fbQhxo0Qlmm0_Au5CpFo5KLuU5Oxpfgt5iUBaBuUxjw', address: '421 Cindy Plains, Henriettehaven, North Carolina, 38957, 1-374-238-5482 x65968, 1-654-944-3614', isFavourite: false }
-  ];
+    // await client.query({
+    //   query: GET_CONTACT_LIST,
+    //   variables: { firstName: '' },
+    // });
+  };
 
-  useEffect(() => {
-    setTimeout(function() {
-      setIsLoading(false)
-    }, 1000);
-  })
+  const totalPages = Math.ceil((data?.contact_aggregate?.aggregate?.count || 0) / pageSize);
 
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+    }
+  };
+  
   return (
     <>
       <Header title="Contact List | Phone Book App" description="Explore our comprehensive Phone Book List, featuring a curated collection of contact information. Easily find and access phone numbers, addresses, and more. Streamline your communication with our user-friendly Phone Book List." />
-      <Loading isOpen={isLoading} />
       <Layout>
 
         <Image className={mainIconSyle} src={contIllust.src} alt='contact-illustration' width={100} height={100} unoptimized />
@@ -121,10 +163,20 @@ export default function PhoneBook() {
           </div>
           <input className={FilterStyle} placeholder='Search' />
           <ContactList contacts={contacts}></ContactList>
+
+          <div className={paginationButton}>
+            <Button size='sm' onClick={() => handlePageChange(page - 1)}>
+              Prev
+            </Button>
+            <span>Page {page} of {totalPages}</span>
+            <Button size='sm' onClick={() => handlePageChange(page + 1)}>
+              Next
+            </Button>
+          </div>
+          
         </div>
 
-        <ModalAdd isOpen={isModalAddOpen} onClose={() => setIsModalAddOpen(false)} />
-
+        <ModalAdd isOpen={isModalAddOpen} onSuccess={() => handleModalClose()} onClose={() => setIsModalAddOpen(false)} />
       </Layout>
     </>
   )

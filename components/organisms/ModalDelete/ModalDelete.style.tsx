@@ -13,12 +13,17 @@ export const modalDelStyles = css`
 `;
 
 export const modalDelHeader = css`
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  align-items: center;
-  margin-top: 20px;
-  margin-bottom: 10px;
+  text-align: center;
+  margin-bottom: 20px;
+
+  p {
+    margin-top: 10px;
+  }
+`;
+
+export const modalDelBody = css`
+  width: 100%;
+  padding: 10px 0 10px 0;
 `;
 
 export const contentDelStyles = css`
@@ -26,4 +31,10 @@ export const contentDelStyles = css`
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+export const submitButton = css`
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 `;
