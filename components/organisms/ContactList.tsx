@@ -33,8 +33,6 @@ const ContactList: React.FC<ContactListProps> = ({ contacts }) => {
   const router = useRouter();
   const [deleteContact] = useMutation(DELETE_CONTACT);
 
-  console.log('CONTACTS DATA', contacts)
-
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
   const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
   const [isAddFav, setIsAddFav] = useState(false);
@@ -164,7 +162,6 @@ const ContactList: React.FC<ContactListProps> = ({ contacts }) => {
           isOpen={isModalEditOpen}
           onClose={() => setIsModalEditOpen(false)}
           onSuccess={() => {
-            console.log("UDAH SUKSES AJA")
             // setIsModalEditOpen(false);
           }}
           initialContact={selectedEditContact}

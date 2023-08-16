@@ -116,7 +116,6 @@ export default function PhoneBook() {
   const contacts = data?.contact || [];
 
   const handleModalClose = () => {
-    console.log("MODAL CLOSED")
     setIsModalAddOpen(false);
     // await addContact({
     //   variables: contactData,

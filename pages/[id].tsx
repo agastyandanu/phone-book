@@ -85,6 +85,10 @@ const ActionBtnStyle = css`
   align-items: center;
 `;
 
+interface Phone {
+  number: string;
+}
+
 interface ContactEdit {
   id: number;
   created_at: string;
@@ -212,7 +216,7 @@ const DetailContact: React.FC<UserDetail> = () => {
               </div>
               <div className='dt'>
                 <span><HiPhone className='icon' /></span>
-                {userDetail?.phones?.map((val, key) => (
+                {userDetail?.phones?.map((val: Phone, key: number) => (
                   <span key={key}>{val.number}</span>
                 ))}
               </div>
@@ -225,7 +229,6 @@ const DetailContact: React.FC<UserDetail> = () => {
           isOpen={isModalEditOpen}
           onClose={() => setIsModalEditOpen(false)}
           onSuccess={() => {
-            console.log("UDAH SUKSES AJA")
             // setIsModalEditOpen(false);
           }}
           initialContact={selectedEditContact}
